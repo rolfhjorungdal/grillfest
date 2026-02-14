@@ -1,0 +1,257 @@
+:root {
+  --bg: #f3efe5;
+  --ink: #2a2a2a;
+  --panel: #fff9ed;
+  --line: #d5c8ad;
+  --accent: #d45d1f;
+  --accent-ink: #fffdf7;
+  --muted: #7b6f58;
+  --good: #2f7d57;
+  --warn: #ac4b35;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top right, #f9dcb8 0%, var(--bg) 45%),
+    linear-gradient(120deg, #ece5d8 0%, #f8f3ea 100%);
+  min-height: 100vh;
+}
+
+.noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  background-image: repeating-linear-gradient(
+    45deg,
+    #000 0,
+    #000 1px,
+    transparent 1px,
+    transparent 6px
+  );
+}
+
+.layout {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.panel {
+  background: color-mix(in srgb, var(--panel) 88%, #fff 12%);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 18px rgba(40, 30, 10, 0.06);
+}
+
+.panel-header {
+  grid-column: 1 / -1;
+}
+
+.panel-controls,
+.panel-people {
+  grid-column: span 6;
+}
+
+.panel-calendar {
+  grid-column: 1 / -1;
+}
+
+h1,
+h2 {
+  margin: 0 0 0.5rem;
+  letter-spacing: 0.03em;
+}
+
+h1 {
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+}
+
+p {
+  margin: 0.3rem 0;
+}
+
+.fineprint {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.grid,
+.row {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.row {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  gap: 0.35rem;
+  font-size: 0.95rem;
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
+
+input,
+select {
+  background: #fffcf4;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+button:hover {
+  filter: brightness(1.05);
+}
+
+button.ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+  align-items: center;
+}
+
+#status {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.people {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.person {
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  padding: 0.7rem;
+  background: #fffdf8;
+}
+
+.person header {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.person header input {
+  flex: 1;
+}
+
+.calendar {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.month {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.55rem;
+  background: #fffdf8;
+}
+
+.month h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.2rem;
+}
+
+.weekday {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+  padding-bottom: 0.1rem;
+}
+
+.day {
+  min-height: 2.2rem;
+  padding: 0.25rem;
+  border-radius: 6px;
+  border: 1px solid #ebdfca;
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #fffefb;
+}
+
+.day.blank {
+  border: none;
+  background: transparent;
+}
+
+.day .count {
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.day.match {
+  background: color-mix(in srgb, #d3f2df 65%, #fff 35%);
+  border-color: color-mix(in srgb, var(--good) 30%, #fff 70%);
+}
+
+.day.perfect {
+  background: color-mix(in srgb, #b9ebce 72%, #fff 28%);
+  border-color: color-mix(in srgb, var(--good) 45%, #fff 55%);
+}
+
+.day .date {
+  font-weight: 700;
+}
+
+@media (max-width: 850px) {
+  .panel-controls,
+  .panel-people {
+    grid-column: 1 / -1;
+  }
+}

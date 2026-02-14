@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grillfest Planner</title>
+    <meta
+      name="description"
+      content="Plan when friends are off work. Share schedules with URL hash only."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="noise"></div>
+    <main class="layout">
+      <section class="panel panel-header">
+        <h1>Grillfest Planner</h1>
+        <p>
+          Add each person's rotation (for example 1 week on / 1 week off or 2/2),
+          choose anchor dates, and share the URL.
+        </p>
+        <p class="fineprint">
+          State is stored only in <code>location.hash</code>. Nothing is sent to the server.
+        </p>
+      </section>
+
+      <section class="panel panel-controls">
+        <form id="controls" autocomplete="off">
+          <div class="grid">
+            <label>
+              Months to display
+              <input id="months" name="months" type="number" min="1" max="24" value="6" />
+            </label>
+            <label>
+              Highlight when at least this many are off
+              <input id="minOff" name="minOff" type="number" min="1" max="30" value="2" />
+            </label>
+          </div>
+        </form>
+
+        <div class="toolbar">
+          <button id="addPerson" type="button">Add person</button>
+          <button id="copyUrl" type="button">Copy share URL</button>
+          <button id="reset" type="button" class="ghost">Reset</button>
+          <span id="status" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <section class="panel panel-people">
+        <h2>Rotations</h2>
+        <div id="peopleList" class="people"></div>
+      </section>
+
+      <section class="panel panel-calendar">
+        <h2>Calendar</h2>
+        <div id="calendar" class="calendar"></div>
+      </section>
+    </main>
+
+    <template id="personTemplate">
+      <article class="person">
+        <header>
+          <input data-field="name" type="text" maxlength="40" placeholder="Name" />
+          <button type="button" data-action="remove" class="ghost">Remove</button>
+        </header>
+        <div class="row">
+          <label>
+            Weeks on
+            <input data-field="weeksOn" type="number" min="1" max="26" />
+          </label>
+          <label>
+            Weeks off
+            <input data-field="weeksOff" type="number" min="1" max="26" />
+          </label>
+          <label>
+            Anchor date
+            <input data-field="anchorDate" type="date" />
+          </label>
+          <label>
+            On anchor date
+            <select data-field="anchorState">
+              <option value="work">Working</option>
+              <option value="off">Off</option>
+            </select>
+          </label>
+        </div>
+      </article>
+    </template>
+
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>

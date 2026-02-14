@@ -17,7 +17,7 @@
         <h1>Grillfest Planner</h1>
         <p>
           Add each person's rotation (for example 1 week on / 1 week off or 2/2),
-          choose anchor dates, and share the URL.
+          choose when their rotation starts, and share the URL.
         </p>
         <p class="fineprint">
           State is stored only in <code>location.hash</code>. Nothing is sent to the server.
@@ -73,14 +73,14 @@
             <input data-field="weeksOff" type="number" min="1" max="26" />
           </label>
           <label>
-            Anchor date
+            Rotation starts
             <input data-field="anchorDate" type="date" />
           </label>
           <label>
-            On anchor date
+            Starts as
             <select data-field="anchorState">
-              <option value="work">Working</option>
-              <option value="off">Off</option>
+              <option value="work">On shift</option>
+              <option value="off">Off shift</option>
             </select>
           </label>
         </div>

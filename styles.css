@@ -219,7 +219,7 @@ input[type="color"] {
 
 .days {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: 3rem repeat(7, minmax(0, 1fr));
   gap: 0.2rem;
 }
 
@@ -230,6 +230,23 @@ input[type="color"] {
   color: var(--muted);
   letter-spacing: 0.03em;
   padding-bottom: 0.1rem;
+}
+
+.weekday.weeklabel,
+.weeknum {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.weeknum {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ebdfca;
+  border-radius: 6px;
+  background: #fffbf1;
 }
 
 .day {

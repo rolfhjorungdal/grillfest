@@ -1,10 +1,13 @@
 import {
+  addDays,
   addMonths,
   differenceInCalendarDays,
   eachDayOfInterval,
   endOfMonth,
+  endOfWeek,
   format,
   getDay,
+  getISOWeek,
   isBefore,
   isEqual,
   parseISO,
@@ -223,6 +226,11 @@ function renderCalendar(timeline) {
     const days = document.createElement("div");
     days.className = "days";
 
+    const weekLabel = document.createElement("div");
+    weekLabel.className = "weekday weeklabel";
+    weekLabel.textContent = "Wk";
+    days.append(weekLabel);
+
     const weekdayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     weekdayNames.forEach((name) => {
       const wd = document.createElement("div");
@@ -232,21 +240,31 @@ function renderCalendar(timeline) {
     });
 
     const pad = (getDay(monthStart) + 6) % 7;
-    for (let i = 0; i < pad; i += 1) {
-      const blank = document.createElement("div");
-      blank.className = "day blank";
-      days.append(blank);
-    }
+    const monthEnd = endOfMonth(monthStart);
+    const gridStart = addDays(monthStart, -pad);
+    const gridEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
 
-    eachDayOfInterval({
-      start: monthStart,
-      end: endOfMonth(monthStart),
-    }).forEach((dayDate) => {
+    for (let rowStart = gridStart; !isAfterDay(rowStart, gridEnd); rowStart = addDays(rowStart, 7)) {
+      const weekNumber = document.createElement("div");
+      weekNumber.className = "weeknum";
+      weekNumber.textContent = String(getISOWeek(rowStart));
+      days.append(weekNumber);
+
+      eachDayOfInterval({
+        start: rowStart,
+        end: addDays(rowStart, 6),
+      }).forEach((dayDate) => {
       const key = format(dayDate, "yyyy-MM-dd");
       const data = byKey.get(key);
 
       const day = document.createElement("div");
       day.className = "day";
+
+      if (isBeforeDay(dayDate, monthStart) || isAfterDay(dayDate, monthEnd)) {
+        day.classList.add("blank");
+        days.append(day);
+        return;
+      }
 
       const dateLabel = document.createElement("span");
       dateLabel.className = "date";
@@ -284,6 +302,7 @@ function renderCalendar(timeline) {
 
       days.append(day);
     });
+    }
 
     monthBox.append(days);
     el.calendar.append(monthBox);
@@ -436,6 +455,14 @@ function normalizeWeeks(person, legacyField, weeksField, fallback) {
 
 function modulo(value, base) {
   return ((value % base) + base) % base;
+}
+
+function isBeforeDay(left, right) {
+  return startOfDay(left).valueOf() < startOfDay(right).valueOf();
+}
+
+function isAfterDay(left, right) {
+  return startOfDay(left).valueOf() > startOfDay(right).valueOf();
 }
 
 function base64ToBase64Url(base64) {

@@ -266,12 +266,6 @@ input[type="color"] {
   background: transparent;
 }
 
-.day .count {
-  font-weight: 600;
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
 .day.free {
   background: #fffefb;
 }

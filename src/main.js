@@ -272,10 +272,6 @@ function renderCalendar(timeline) {
       day.append(dateLabel);
 
       if (data) {
-        const count = document.createElement("span");
-        count.className = "count";
-        count.textContent = data.onCount === 0 ? "all free" : `${data.onCount} on`;
-
         if (data.onCount > 0) {
           const colors = data.workingPeople.map((p) => p.color);
           day.style.background = createWorkGradient(colors);
@@ -296,8 +292,6 @@ function renderCalendar(timeline) {
           day.style.borderColor = "";
           day.classList.add("free");
         }
-
-        day.append(count);
       }
 
       days.append(day);

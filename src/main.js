@@ -310,7 +310,7 @@ function renderCalendar(timeline) {
 }
 
 function computeTimeline(current) {
-  const from = startOfDay(new Date());
+  const from = getTimelineStartDate(current);
   const to = endOfMonth(addMonths(from, current.months - 1));
 
   return eachDayOfInterval({ start: from, end: to }).map((date) => {
@@ -325,6 +325,19 @@ function computeTimeline(current) {
       })),
     };
   });
+}
+
+function getTimelineStartDate(current) {
+  const today = startOfDay(new Date());
+  if (!Array.isArray(current?.people) || current.people.length === 0) return today;
+
+  let earliest = today;
+  current.people.forEach((person) => {
+    const anchor = parseSafeDate(person.anchorDate);
+    if (isBeforeDay(anchor, earliest)) earliest = anchor;
+  });
+
+  return earliest;
 }
 
 function isOffOnDate(person, date) {

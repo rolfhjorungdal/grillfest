@@ -12,13 +12,26 @@ import {
   startOfMonth,
 } from "https://cdn.jsdelivr.net/npm/date-fns@4.1.0/+esm";
 
+const PERSON_COLORS = [
+  "#d14a36",
+  "#157f8a",
+  "#6b8e23",
+  "#7c4dff",
+  "#ef6c00",
+  "#2e7d32",
+  "#00897b",
+  "#ad1457",
+  "#455a64",
+  "#6d4c41",
+];
+
 const DEFAULT_STATE = {
   months: 6,
-  minOff: 2,
   people: [
     {
       id: createId(),
       name: "Friend A",
+      color: getDefaultColor(0),
       weeksOn: 1,
       weeksOff: 1,
       anchorDate: format(new Date(), "yyyy-MM-dd"),
@@ -27,6 +40,7 @@ const DEFAULT_STATE = {
     {
       id: createId(),
       name: "Friend B",
+      color: getDefaultColor(1),
       weeksOn: 2,
       weeksOff: 2,
       anchorDate: format(new Date(), "yyyy-MM-dd"),
@@ -39,7 +53,6 @@ const MAX_PEOPLE = 30;
 
 const el = {
   months: document.querySelector("#months"),
-  minOff: document.querySelector("#minOff"),
   addPerson: document.querySelector("#addPerson"),
   copyUrl: document.querySelector("#copyUrl"),
   reset: document.querySelector("#reset"),
@@ -60,12 +73,7 @@ window.addEventListener("hashchange", () => {
 
 el.months.addEventListener("input", (event) => {
   state.months = clampInt(event.target.value, 1, 24, 6);
-  update();
-});
-
-el.minOff.addEventListener("input", (event) => {
-  state.minOff = clampInt(event.target.value, 1, MAX_PEOPLE, 2);
-  update();
+  updateAll();
 });
 
 el.addPerson.addEventListener("click", () => {
@@ -77,12 +85,13 @@ el.addPerson.addEventListener("click", () => {
   state.people.push({
     id: createId(),
     name: `Friend ${String.fromCharCode(65 + (state.people.length % 26))}`,
+    color: getDefaultColor(state.people.length),
     weeksOn: 1,
     weeksOff: 1,
     anchorDate: format(new Date(), "yyyy-MM-dd"),
     anchorState: "off",
   });
-  update();
+  updateAll();
 });
 
 el.copyUrl.addEventListener("click", async () => {
@@ -97,7 +106,7 @@ el.copyUrl.addEventListener("click", async () => {
 
 el.reset.addEventListener("click", () => {
   state = structuredClone(DEFAULT_STATE);
-  update();
+  updateAll();
   setStatus("Reset to defaults");
 });
 
@@ -114,6 +123,10 @@ el.peopleList.addEventListener("input", (event) => {
   if (!field) return;
 
   if (field === "name") person.name = input.value.trim().slice(0, 40);
+  if (field === "color") {
+    person.color = sanitizeColor(input.value, person.color);
+    card.style.borderLeftColor = person.color;
+  }
   if (field === "weeksOn") person.weeksOn = clampInt(input.value, 1, 26, 1);
   if (field === "weeksOff") person.weeksOff = clampInt(input.value, 1, 26, 1);
   if (field === "anchorDate") person.anchorDate = sanitizeDate(input.value);
@@ -121,7 +134,7 @@ el.peopleList.addEventListener("input", (event) => {
     person.anchorState = input.value === "work" ? "work" : "off";
   }
 
-  update();
+  updateCalendarOnly();
 });
 
 el.peopleList.addEventListener("click", (event) => {
@@ -136,6 +149,7 @@ el.peopleList.addEventListener("click", (event) => {
     state.people.push({
       id: createId(),
       name: "Friend A",
+      color: getDefaultColor(0),
       weeksOn: 1,
       weeksOff: 1,
       anchorDate: format(new Date(), "yyyy-MM-dd"),
@@ -143,22 +157,27 @@ el.peopleList.addEventListener("click", (event) => {
     });
   }
 
-  update();
+  updateAll();
 });
 
-function update() {
+function updateAll() {
   persistStateToHash(state);
   render();
 }
 
+function updateCalendarOnly() {
+  persistStateToHash(state);
+  const timeline = computeTimeline(state);
+  renderCalendar(timeline);
+}
+
 function render() {
   el.months.value = String(state.months);
-  el.minOff.value = String(state.minOff);
 
   renderPeople();
 
   const timeline = computeTimeline(state);
-  renderCalendar(timeline, state.minOff);
+  renderCalendar(timeline);
 }
 
 function renderPeople() {
@@ -168,6 +187,7 @@ function renderPeople() {
     const fragment = el.personTemplate.content.cloneNode(true);
     const card = fragment.querySelector(".person");
     card.dataset.id = person.id;
+    card.style.borderLeftColor = person.color;
 
     const fields = card.querySelectorAll("[data-field]");
     fields.forEach((fieldEl) => {
@@ -179,7 +199,7 @@ function renderPeople() {
   });
 }
 
-function renderCalendar(timeline, minOff) {
+function renderCalendar(timeline) {
   el.calendar.replaceChildren();
 
   if (!timeline.length) return;
@@ -236,11 +256,30 @@ function renderCalendar(timeline, minOff) {
       if (data) {
         const count = document.createElement("span");
         count.className = "count";
-        count.textContent = `${data.offCount} off`;
-        day.append(count);
+        count.textContent = data.onCount === 0 ? "all free" : `${data.onCount} on`;
 
-        if (data.offCount >= minOff) day.classList.add("match");
-        if (data.offCount === state.people.length) day.classList.add("perfect");
+        if (data.onCount > 0) {
+          const colors = data.workingPeople.map((p) => p.color);
+          day.style.background = createWorkGradient(colors);
+          day.style.borderColor = colors[0];
+
+          const stripes = document.createElement("div");
+          stripes.className = "work-stripes";
+          data.workingPeople.forEach((person) => {
+            const stripe = document.createElement("span");
+            stripe.className = "work-stripe";
+            stripe.style.backgroundColor = person.color;
+            stripe.title = person.name || "(unnamed)";
+            stripes.append(stripe);
+          });
+          day.append(stripes);
+        } else {
+          day.style.background = "";
+          day.style.borderColor = "";
+          day.classList.add("free");
+        }
+
+        day.append(count);
       }
 
       days.append(day);
@@ -256,11 +295,15 @@ function computeTimeline(current) {
   const to = endOfMonth(addMonths(from, current.months - 1));
 
   return eachDayOfInterval({ start: from, end: to }).map((date) => {
-    const offPeople = current.people.filter((person) => isOffOnDate(person, date));
+    const workingPeople = current.people.filter((person) => !isOffOnDate(person, date));
     return {
       date,
-      offCount: offPeople.length,
-      names: offPeople.map((p) => p.name || "(unnamed)"),
+      onCount: workingPeople.length,
+      workingPeople: workingPeople.map((p) => ({
+        id: p.id,
+        name: p.name || "(unnamed)",
+        color: sanitizeColor(p.color, "#999999"),
+      })),
     };
   });
 }
@@ -321,14 +364,14 @@ function persistStateToHash(current) {
 function sanitizeState(value) {
   const clean = {
     months: clampInt(value?.months, 1, 24, DEFAULT_STATE.months),
-    minOff: clampInt(value?.minOff, 1, MAX_PEOPLE, DEFAULT_STATE.minOff),
     people: Array.isArray(value?.people) ? value.people.slice(0, MAX_PEOPLE) : [],
   };
 
   clean.people = clean.people
-    .map((person) => ({
+    .map((person, index) => ({
       id: typeof person?.id === "string" ? person.id : createId(),
       name: typeof person?.name === "string" ? person.name.slice(0, 40) : "",
+      color: sanitizeColor(person?.color, getDefaultColor(index)),
       weeksOn: normalizeWeeks(person, "workDays", "weeksOn", 1),
       weeksOff: normalizeWeeks(person, "offDays", "weeksOff", 1),
       anchorDate: sanitizeDate(person?.anchorDate),
@@ -339,8 +382,6 @@ function sanitizeState(value) {
   if (!clean.people.length) {
     clean.people = structuredClone(DEFAULT_STATE.people);
   }
-
-  clean.minOff = clampInt(clean.minOff, 1, clean.people.length, 1);
 
   return clean;
 }
@@ -361,6 +402,16 @@ function clampInt(value, min, max, fallback) {
   const n = Number.parseInt(String(value), 10);
   if (Number.isNaN(n)) return fallback;
   return Math.min(max, Math.max(min, n));
+}
+
+function sanitizeColor(value, fallback) {
+  if (typeof value !== "string") return fallback;
+  if (/^#[0-9a-fA-F]{6}$/.test(value)) return value.toLowerCase();
+  return fallback;
+}
+
+function getDefaultColor(index) {
+  return PERSON_COLORS[index % PERSON_COLORS.length];
 }
 
 function createId() {
@@ -421,6 +472,34 @@ function setStatus(text) {
   setStatus.timer = window.setTimeout(() => {
     el.status.textContent = "";
   }, 2000);
+}
+
+function createWorkGradient(colors) {
+  const palette = Array.from(new Set(colors.filter((c) => /^#[0-9a-fA-F]{6}$/.test(c))));
+  if (!palette.length) return "";
+  if (palette.length === 1) {
+    return `linear-gradient(160deg, ${hexToRgba(palette[0], 0.25)}, #fffefb 70%)`;
+  }
+
+  const step = 100 / palette.length;
+  const stops = palette
+    .map((color, index) => {
+      const start = (index * step).toFixed(2);
+      const end = ((index + 1) * step).toFixed(2);
+      const tint = hexToRgba(color, 0.22);
+      return `${tint} ${start}% ${end}%`;
+    })
+    .join(", ");
+
+  return `linear-gradient(160deg, ${stops})`;
+}
+
+function hexToRgba(hex, alpha) {
+  const clean = hex.replace("#", "");
+  const r = Number.parseInt(clean.slice(0, 2), 16);
+  const g = Number.parseInt(clean.slice(2, 4), 16);
+  const b = Number.parseInt(clean.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 persistStateToHash(state);

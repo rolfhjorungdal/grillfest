@@ -11,7 +11,6 @@ A static GitHub Pages app for planning overlap in work rotations (e.g. 3-on/3-of
   - `weeksOff`
   - `anchorDate`
   - `anchorState` (`work` or `off` on anchor date)
-- Highlights days where at least `minOff` people are off.
 
 ## Run locally
 

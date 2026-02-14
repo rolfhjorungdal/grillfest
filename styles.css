@@ -164,6 +164,7 @@ button.ghost {
 
 .person {
   border: 1px dashed var(--line);
+  border-left: 6px solid var(--line);
   border-radius: 10px;
   padding: 0.7rem;
   background: #fffdf8;
@@ -177,6 +178,25 @@ button.ghost {
 }
 
 .person header input {
+  flex: 1;
+}
+
+input[type="color"] {
+  padding: 0.2rem;
+  min-height: 2.2rem;
+}
+
+.work-stripes {
+  display: flex;
+  width: 100%;
+  min-height: 0.38rem;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 0.15rem;
+}
+
+.work-stripe {
   flex: 1;
 }
 
@@ -230,19 +250,13 @@ button.ghost {
 }
 
 .day .count {
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.75rem;
   color: var(--muted);
 }
 
-.day.match {
-  background: color-mix(in srgb, #d3f2df 65%, #fff 35%);
-  border-color: color-mix(in srgb, var(--good) 30%, #fff 70%);
-}
-
-.day.perfect {
-  background: color-mix(in srgb, #b9ebce 72%, #fff 28%);
-  border-color: color-mix(in srgb, var(--good) 45%, #fff 55%);
+.day.free {
+  background: #fffefb;
 }
 
 .day .date {
